@@ -1,0 +1,306 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RouteCraft AI — Multi-Agent Travel Planner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="logo.jpg">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Topbar Header -->
+    <header class="topbar">
+      <div class="brand-wrapper">
+        <div class="brand-icon">
+          <img src="logo.jpg" alt="RouteCraft AI Logo">
+        </div>
+        <div class="brand">
+          RouteCraft AI
+          <small>A tiny travel crew in your notebook ✦</small>
+        </div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="exportBtn" title="Export Itinerary">📤 Export</button>
+        <button class="btn" id="settingsBtn" title="Configure Keys & Settings">⚙️ Settings</button>
+        <button class="btn primary" id="resetBtn">✨ New Trip</button>
+      </div>
+    </header>
+
+    <!-- Quick Inspiration Presets Bar -->
+    <div class="presets-bar">
+      <span class="presets-label">⚡ Quick Inspiration:</span>
+      <div id="presetChips" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+    </div>
+
+    <!-- Main Workspace Grid -->
+    <main class="main-grid">
+      <!-- Left Column: Input Brief, Agent Crew, Scoring -->
+      <div class="stack">
+        <!-- 1. Trip Brief Card -->
+        <section class="card tilt-left">
+          <div class="card-header">
+            <div>
+              <h2>Plan a trip, on paper.</h2>
+              <div class="card-subtitle">Tell the crew where you want to go and what sparks joy.</div>
+            </div>
+            <span class="badge highlight">Brief</span>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="origin">Leaving from</label>
+              <input id="origin" placeholder="e.g. New Delhi, London, New York" value="New Delhi"/>
+            </div>
+            <div class="field">
+              <label for="dates">Date range</label>
+              <input id="dates" placeholder="e.g. Oct 10–16, 2026" value="Oct 10–16, 2026"/>
+            </div>
+            <div class="field full">
+              <label for="cities">Candidate Cities to Compare</label>
+              <input id="cities" placeholder="e.g. Tokyo, Seoul, Bangkok" value="Tokyo, Seoul, Bangkok"/>
+            </div>
+            <div class="field full">
+              <label for="interests">Travel Style & Interests</label>
+              <textarea id="interests" placeholder="e.g. Street food, anime culture, neighborhood walks, vintage shopping, hidden gems">Street food, anime culture, neighborhood walks, vintage shopping, shrine visits</textarea>
+            </div>
+            <div class="field full">
+              <label>Currency Preference</label>
+              <div class="currency-row">
+                <button type="button" class="currency-btn active" data-curr="INR">₹ INR</button>
+                <button type="button" class="currency-btn" data-curr="USD">$ USD</button>
+                <button type="button" class="currency-btn" data-curr="EUR">€ EUR</button>
+                <button type="button" class="currency-btn" data-curr="GBP">£ GBP</button>
+                <button type="button" class="currency-btn" data-curr="JPY">¥ JPY</button>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn primary cta-btn" id="planBtn">
+            ✦ Build my 7-day plan
+          </button>
+        </section>
+
+        <!-- 2. Multi-Agent Crew Lane -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h3>Crew in motion</h3>
+              <div class="card-subtitle">3 specialized AI agents collaborating on your trip</div>
+            </div>
+            <span class="badge">Multi-Agent</span>
+          </div>
+
+          <div class="agents-grid">
+            <!-- Scout Agent -->
+            <div class="agent-card scout" id="agentScout">
+              <div class="agent-card-header">
+                <span class="agent-icon">🔭</span>
+                <span class="agent-name">Scout</span>
+              </div>
+              <p class="agent-role">City Selection Expert</p>
+              <div class="agent-status-tag"><span class="dot"></span> ready</div>
+              <div class="agent-log">Evaluates weather, season, flight prices, and traveler fit score.</div>
+            </div>
+
+            <!-- Local Agent -->
+            <div class="agent-card local" id="agentLocal">
+              <div class="agent-card-header">
+                <span class="agent-icon">🧭</span>
+                <span class="agent-name">Local</span>
+              </div>
+              <p class="agent-role">Local Guide & Secrets</p>
+              <div class="agent-status-tag"><span class="dot"></span> ready</div>
+              <div class="agent-log">Surfaces neighborhood routes, authentic eateries, and hidden gems.</div>
+            </div>
+
+            <!-- Concierge Agent -->
+            <div class="agent-card concierge" id="agentConcierge">
+              <div class="agent-card-header">
+                <span class="agent-icon">🧳</span>
+                <span class="agent-name">Concierge</span>
+              </div>
+              <p class="agent-role">Travel Concierge</p>
+              <div class="agent-status-tag"><span class="dot"></span> ready</div>
+              <div class="agent-log">Assembles 7-day chapter timeline, budgets, and packing list.</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- 3. Destination Recommendation & Fit Score Card -->
+        <section class="card tilt-right">
+          <div class="card-header">
+            <div>
+              <h3>Best match recommendation</h3>
+              <div class="card-subtitle" id="weatherSnippet">⛅ Pleasant autumn climate</div>
+            </div>
+            <span class="badge success">Winner Selected</span>
+          </div>
+
+          <div class="score-display">
+            <div>
+              <div class="city-winner-title" id="winnerCity">Tokyo</div>
+            </div>
+            <div class="score-big">
+              <span id="fitScore">94</span>
+              <small>Fit Score</small>
+            </div>
+          </div>
+
+          <p id="tripSummary" style="margin-top: 12px; font-size: 14.5px; line-height: 1.4;">
+            Your trip is tuned for street food, animation, neighborhood walks, and cultural landmarks.
+          </p>
+
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <b id="metricScore">94/100</b>
+              <span>Scout Fit Score</span>
+            </div>
+            <div class="metric-box">
+              <b id="metricCost">₹1,99,000</b>
+              <span>Est. Total Trip</span>
+            </div>
+            <div class="metric-box">
+              <b id="metricSources">3</b>
+              <span>Verified Sources</span>
+            </div>
+            <div class="metric-box">
+              <b id="metricDays">7</b>
+              <span>Days Planned</span>
+            </div>
+          </div>
+
+          <!-- Destination Comparison Table -->
+          <div id="comparisonContainer"></div>
+        </section>
+
+        <!-- 4. Packing Checklist Card -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h3>What to pack & prepare</h3>
+              <div class="card-subtitle">Tailored packing advice from Concierge</div>
+            </div>
+            <span class="badge">Checklist</span>
+          </div>
+          <div class="checklist-grid" id="checklistGrid"></div>
+        </section>
+
+        <!-- 5. Budget Breakdown Card -->
+        <section class="card tilt-left">
+          <div class="card-header">
+            <div>
+              <h3>Where the numbers go</h3>
+              <div class="card-subtitle">Estimated cost breakdown synthesized by Concierge</div>
+            </div>
+            <span class="badge">Budget</span>
+          </div>
+
+          <div class="metrics-grid">
+            <div class="metric-box">
+              <b id="budgetFlight">₹48,000</b>
+              <span>Flights</span>
+            </div>
+            <div class="metric-box">
+              <b id="budgetHotel">₹62,000</b>
+              <span>Hotel (6 nights)</span>
+            </div>
+            <div class="metric-box">
+              <b id="budgetFood">₹28,000</b>
+              <span>Food & Drinks</span>
+            </div>
+            <div class="metric-box">
+              <b id="budgetFun">₹46,000</b>
+              <span>Fun & Transit</span>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 2px dashed var(--line-light);">
+            <span style="font-weight: 700; font-size: 14px; text-transform: uppercase; color: var(--muted);">Estimated Total Investment:</span>
+            <strong id="budgetTotal" style="font-family: 'Caveat', cursive; font-size: 34px; color: var(--blue-dark);">₹1,99,000</strong>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column: Itinerary Chapters & Research Trail -->
+      <div class="stack">
+        <!-- 1. 7-Day Itinerary Notebook -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h3>Seven little chapters</h3>
+              <div class="card-subtitle">Your day-by-day tailored notebook journey</div>
+            </div>
+            <span class="badge highlight">7 Days</span>
+          </div>
+          <div class="itinerary-list" id="itineraryList"></div>
+        </section>
+
+        <!-- 2. Research Sources Trail -->
+        <section class="card">
+          <div class="card-header">
+            <div>
+              <h3>Research trail</h3>
+              <div class="card-subtitle">Verified external sources cited by our agent crew</div>
+            </div>
+            <span class="badge">Sources</span>
+          </div>
+          <div class="sources-list" id="sourcesList"></div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <!-- Export Modal -->
+  <div class="modal-overlay" id="exportModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeExportModal()">✕</button>
+      <h2>Export Itinerary</h2>
+      <p style="color: var(--muted); margin-bottom: 20px;">Save or share your RouteCraft AI travel notebook.</p>
+      
+      <div style="display: grid; gap: 12px;">
+        <button class="btn" onclick="exportPrint()">🖨️ Print / Save as PDF Notebook</button>
+        <button class="btn" onclick="exportMarkdown()">📝 Download as Markdown (.md)</button>
+        <button class="btn" onclick="exportJSON()">💾 Download as JSON Data (.json)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div class="modal-overlay" id="settingsModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeSettingsModal()">✕</button>
+      <h2>RouteCraft AI Settings</h2>
+      <p style="color: var(--muted); margin-bottom: 18px;">Configure optional server-side or local API credentials.</p>
+      
+      <div class="field" style="margin-bottom: 14px;">
+        <label>Custom Groq API Key (Optional)</label>
+        <input type="password" id="settingGroq" placeholder="gsk_..."/>
+        <small style="color: var(--muted); font-size: 11px;">🔒 Server-side default AI engine is securely active. Enter your own key to override.</small>
+      </div>
+
+      <div class="field" style="margin-bottom: 14px;">
+        <label>Serper API Key (Optional)</label>
+        <input type="password" id="settingSerper" placeholder="serper-api-key"/>
+        <small style="color: var(--muted); font-size: 11px;">Enables live Google Search querying.</small>
+      </div>
+
+      <div class="field" style="margin-bottom: 18px;">
+        <label>Browserless API Key (Optional)</label>
+        <input type="password" id="settingBrowserless" placeholder="browserless-api-key"/>
+        <small style="color: var(--muted); font-size: 11px;">Enables cloud headless web scraping.</small>
+      </div>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end;">
+        <button class="btn" onclick="closeSettingsModal()">Cancel</button>
+        <button class="btn primary" onclick="saveSettings()">Save Configuration</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Environments and Secrets
+.env
+.env.*
+!.env.example
+*.env
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.venv/
+env/
+venv/
+ENV/
+
+# System and logs
+.DS_Store
+Thumbs.db
+*.log
+.system_generated/
+
+# Node
+node_modules/
+dist/
+.vercel
